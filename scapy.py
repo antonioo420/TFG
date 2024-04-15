@@ -22,4 +22,4 @@ def process_packet(packet):
 
 # Captura de paquetes en tiempo real
 print("Capturando paquetes de red...")
-sniff(prn=process_packet, filter="(ip.src == 10.45.0.7) or (ip.dst == 10.45.0.7)")  # Filtra solo paquetes IP
+sniff(iface="ogstun", prn=process_packet, filter="host 10.45.0.2")  # Filtra solo paquetes IP

@@ -1,8 +1,9 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, Response
 import time
 import threading
 from datetime import datetime
 import re
+import subprocess as sub
 
 app = Flask(__name__)
 
@@ -29,6 +30,17 @@ def actualizar_informacion():
         informacion = obtener_informacion(SMF)
         app.config['INFORMACION'] = informacion
         time.sleep(5)  # Esperar 5 segundos antes de volver a obtener la información
+
+def obtener_trafico():
+    # Ejecutar tcpdump con sudo para capturar el tráfico de red en tiempo real
+    p = sub.Popen(('sudo', 'tcpdump', '-i', 'ogstun','-l', 'host', '10.45.0.2'), stdout=sub.PIPE, bufsize=1, universal_newlines=True)
+
+    for row in iter(p.stdout.readline, ''):
+        yield 'data: {}\n\n'.format(row.rstrip())
+
+@app.route('/trafico')
+def mostrar_trafico():
+    return Response(obtener_trafico(), content_type='text/event-stream')
 
 @app.route('/')
 def mostrar_informacion():

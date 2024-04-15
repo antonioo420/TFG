@@ -1,7 +1,7 @@
 import subprocess as sub
 
 # Ejecutar tcpdump con sudo para capturar el tráfico de red en tiempo real
-p = sub.Popen(('sudo', 'tcpdump', '-l', 'host', '10.45.0.7'), stdout=sub.PIPE)
+p = sub.Popen(('sudo', 'tcpdump', '-i', 'ogstun','-l', 'host', '10.45.0.2'), stdout=sub.PIPE)
 
 # Leer la salida de tcpdump línea por línea
 for row in iter(p.stdout.readline, b''):

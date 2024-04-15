@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trafico de Red en Tiempo Real</title>
+</head>
+<body>
+
+<h1>Trafico de Red en Tiempo Real</h1>
+
+<div id="trafico"></div>
+
+<script>
+    var source = new EventSource('/trafico');
+
+    source.onmessage = function(event) {
+        var traficoDiv = document.getElementById('trafico');
+        traficoDiv.innerHTML += event.data + '<br>';
+    };
+</script>
+
+</body>
+</html>
