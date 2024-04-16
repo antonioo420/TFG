@@ -4,12 +4,15 @@ import threading
 from datetime import datetime
 import re
 import subprocess as sub
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 #Variables globales
 SMF = '/var/log/open5gs/smf.log'
 fecha_mas_reciente = datetime(1,1,1,0,0)
+MAX_PACKETS = 2
 
 def obtener_informacion(nombre_archivo):
     global fecha_mas_reciente
@@ -24,27 +27,8 @@ def obtener_informacion(nombre_archivo):
                     linea_mas_reciente = linea
     return linea_mas_reciente.strip()
 
-
-def actualizar_informacion():
-    while True:
-        informacion = obtener_informacion(SMF)
-        app.config['INFORMACION'] = informacion
-        time.sleep(5)  # Esperar 5 segundos antes de volver a obtener la información
-
-def obtener_trafico():
-    # Ejecutar tcpdump con sudo para capturar el tráfico de red en tiempo real
-    p = sub.Popen(('sudo', 'tcpdump', '-i', 'ogstun','-l', 'host', '10.45.0.2'), stdout=sub.PIPE, bufsize=1, universal_newlines=True)
-
-    for row in iter(p.stdout.readline, ''):
-        yield 'data: {}\n\n'.format(row.rstrip())
-
-@app.route('/trafico')
-def mostrar_trafico():
-    return Response(obtener_trafico(), content_type='text/event-stream')
-
 @app.route('/')
 def mostrar_informacion():
-    #informacion = app.config.get('INFORMACION', '')
     informacion = obtener_informacion(SMF)
 
     ip_regex = r'IPv4\[(\d+\.\d+\.\d+\.\d+)\]'
@@ -62,7 +46,28 @@ def mostrar_informacion():
     
     return render_template('index.html', ip=ip, apn=apn, imsi=imsi)
 
+def obtener_trafico():    
+    p = sub.Popen(['sudo', 'tcpdump', '-i', 'enp5s0', '-l', 'host', '158.49.247.113', '-c', str(MAX_PACKETS)], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
+    
+    for row in iter(p.stdout.readline, ''):
+        yield row.rstrip()
+
+    p.stdout.close()
+
+def actualizar_trafico():
+    while True:
+        traffic_data = list(obtener_trafico())
+        print("Emitiendo:", traffic_data)  # Para depuración
+        socketio.emit('trafico_update', {'traffic': traffic_data}, namespace='/trafico')
+        time.sleep(2)
+
+@app.route('/trafico')
+def mostrar_trafico():
+    return render_template('trafico.html')
+
 if __name__ == '__main__':
-    thread = threading.Thread(target=actualizar_informacion)
-    thread.start()
-    app.run(debug=True)
+    t = threading.Thread(target=actualizar_trafico)
+    t.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
+    t.start()
+    print("illlllo")
+    socketio.run(app, debug=True)

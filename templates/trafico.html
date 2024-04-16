@@ -2,21 +2,35 @@
 <html>
 <head>
     <title>Trafico de Red en Tiempo Real</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
-<body>
+    <body>
 
-<h1>Trafico de Red en Tiempo Real</h1>
+    <h1>Trafico de Red en Tiempo Real</h1>
 
-<div id="trafico"></div>
+    <div id="trafico">
+        {% for row in traffic %}       
+            {{row}}<br> 
+        {% endfor %}   
+    </div>
 
-<script>
-    var source = new EventSource('/trafico');
-
-    source.onmessage = function(event) {
-        var traficoDiv = document.getElementById('trafico');
-        traficoDiv.innerHTML += event.data + '<br>';
-    };
-</script>
-
+    <script type="text/javascript">
+        var socket = io.connect('http://' + document.domain + ':5000/trafico');
+    
+        socket.on('connect', function() {
+            socket.emit('trafico_update');
+        });
+    
+        socket.on('trafico_update', function(data) {
+            var traficoDiv = document.getElementById('trafico');
+            console.log("Recibido:", data);  // Para depuración
+            traficoDiv.innerHTML = '';  // Limpiar el contenido anterior
+    
+            var trafficData = data.traffic;
+            for (var i = 0; i < trafficData.length; i++) {
+                traficoDiv.innerHTML += trafficData[i] + '<br>';
+            }
+        });
+    </script>    
 </body>
 </html>
