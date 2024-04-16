@@ -5,15 +5,17 @@ from datetime import datetime
 import re
 import subprocess as sub
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+cors = CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*", namespace='/trafico')
 
 #Variables globales
 SMF = '/var/log/open5gs/smf.log'
 fecha_mas_reciente = datetime(1,1,1,0,0)
 MAX_PACKETS = 2
-
+ip = 0
 def obtener_informacion(nombre_archivo):
     global fecha_mas_reciente
     linea_mas_reciente = ""
@@ -29,6 +31,7 @@ def obtener_informacion(nombre_archivo):
 
 @app.route('/')
 def mostrar_informacion():
+    global ip
     informacion = obtener_informacion(SMF)
 
     ip_regex = r'IPv4\[(\d+\.\d+\.\d+\.\d+)\]'
@@ -47,7 +50,8 @@ def mostrar_informacion():
     return render_template('index.html', ip=ip, apn=apn, imsi=imsi)
 
 def obtener_trafico():    
-    p = sub.Popen(['sudo', 'tcpdump', '-i', 'enp5s0', '-l', 'host', '158.49.247.113', '-c', str(MAX_PACKETS)], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
+    print('IP actual: ', ip)
+    p = sub.Popen(['sudo', 'tcpdump', '-i', 'ogstun', '-l', 'host', '10.45.0.2'], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
     
     for row in iter(p.stdout.readline, ''):
         yield row.rstrip()
@@ -56,18 +60,22 @@ def obtener_trafico():
 
 def actualizar_trafico():
     while True:
-        traffic_data = list(obtener_trafico())
-        print("Emitiendo:", traffic_data)  # Para depuración
-        socketio.emit('trafico_update', {'traffic': traffic_data}, namespace='/trafico')
-        time.sleep(2)
+        for row in obtener_trafico():            
+            socketio.emit('trafico_update', row)
+            #print("Emitiendo:", row)  # Para depuración            
+        
 
 @app.route('/trafico')
 def mostrar_trafico():
     return render_template('trafico.html')
 
+@socketio.on('connect')
+def handle_connect():
+    print('Cliente conectado')
+
 if __name__ == '__main__':
     t = threading.Thread(target=actualizar_trafico)
     t.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
     t.start()
-    print("illlllo")
+
     socketio.run(app, debug=True)
