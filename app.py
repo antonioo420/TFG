@@ -56,13 +56,16 @@ def mostrar_informacion():
     """ t = threading.Thread(target=actualizar_informacion)
     t.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
     t.start()   """    
-    ip, apn, imsi = obtener_informacion(SMF)
+    #ip, apn, imsi = obtener_informacion(SMF)
+    ip = '192.168.9.139'
+    apn = 'internet'
+    imsi = '00000000000'
     print ('IP index:', ip)
     return render_template('index.html', ip=ip, apn=apn, imsi=imsi)
 
 def obtener_trafico():    
     print('IP trafico: ', ip)
-    p = sub.Popen(['sudo', 'tcpdump', '-i', 'ogstun', '-l', 'host', str(ip)], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
+    p = sub.Popen(['sudo', 'tcpdump', '-i', 'wlo1', '-l', 'host', str(ip)], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
     
     for row in iter(p.stdout.readline, ''):
         yield row.rstrip()
@@ -72,7 +75,7 @@ def obtener_trafico():
 def actualizar_trafico():
     for row in obtener_trafico():            
         socketio.emit('trafico_update', row)
-        #print("Emitiendo:", row)  # Para depuración            
+        print("Emitiendo:", row)  # Para depuración            
         
 @app.route('/trafico')
 def mostrar_trafico():
