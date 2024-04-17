@@ -3,10 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <title>Información en Tiempo Real</title>
 </head>
 <body>
     <h1>Información en Tiempo Real</h1>
+
+    <script type="text/javascript">
+    
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+    
+        socket.on('connect', function() {
+            console.log("Conectado al servidor index");
+        });
+    
+        socket.on('info_update', function(data) {
+            console.log("Recibido:", data);  // Para depuración
+            
+            document.getElementById('informacion').innerHTML += '<li>IP: ' + data[0] + '</li>'
+                                                                '<li>IMSI: ' + data[1] + '</li>'
+                                                                '<li>APN: ' + data[2] + '</li>';
+        });
+    </script>
+
     <div id="informacion">
         <p>UE conectado con la siguiente informacion:</p>
         <ul>
