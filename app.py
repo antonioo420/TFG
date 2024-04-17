@@ -46,26 +46,23 @@ def obtener_informacion(nombre_archivo):
     return ip, apn, imsi
 
 def actualizar_informacion():
-    ip, apn, imsi = obtener_informacion(SMF)  
-    print('Emitiendo:', ip, apn, imsi)
-    socketio.emit('info_update', [ip, apn, imsi])
-
-@app.route('/')
-def mostrar_informacion():
     global ip
-    """ t = threading.Thread(target=actualizar_informacion)
-    t.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
-    t.start()   """    
-    #ip, apn, imsi = obtener_informacion(SMF)
-    ip = '192.168.9.139'
-    apn = 'internet'
-    imsi = '00000000000'
-    print ('IP index:', ip)
-    return render_template('index.html', ip=ip, apn=apn, imsi=imsi)
+    ip, apn, imsi = obtener_informacion(SMF)  
+    print('Emitiendo:', {'ip':ip, 'apn':apn, 'imsi':imsi})
+    socketio.emit('info_update', {'ip':ip, 'apn':apn, 'imsi':imsi})
+    print('hoal')
+    
+@app.route('/')
+def mostrar_informacion():    
+    t2 = threading.Thread(target=actualizar_informacion)
+    t2.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
+    t2.start()      
+    #ip, apn, imsi = obtener_informacion(SMF)    
+    return render_template('index.html'), 200
 
 def obtener_trafico():    
     print('IP trafico: ', ip)
-    p = sub.Popen(['sudo', 'tcpdump', '-i', 'wlo1', '-l', 'host', str(ip)], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
+    p = sub.Popen(['sudo', 'tcpdump', '-i', 'ogstun', '-l', 'host', str(ip)], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
     
     for row in iter(p.stdout.readline, ''):
         yield row.rstrip()

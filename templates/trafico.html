@@ -6,26 +6,26 @@
 </head>
 <body>
 
-<h1>Trafico de Red en Tiempo Real</h1>
+    <h1>Trafico de Red en Tiempo Real</h1>
 
-<script type="text/javascript">
-    
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
-
-    socket.on('connect', function() {
-        console.log("Conectado al servidor");
-    });
-
-    socket.on('trafico_update', function(data) {
-        console.log("Recibido:", data);  // Para depuración
+    <script type="text/javascript">
         
-        document.getElementById('trafico').innerHTML += '<li>' + data + '</li>';
-    });
-</script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-<div id="trafico">
-    <!--Trafico-->
-</div>
+        socket.on('connect', function() {
+            console.log("Conectado al servidor");
+        });
+
+        socket.on('trafico_update', function(data) {
+            console.log("Recibido:", data);  // Para depuración
+            
+            document.getElementById('trafico').innerHTML += '<li>' + data + '</li>';
+        });
+    </script>
+
+    <div id="trafico">
+        <!--Trafico-->
+    </div>
 
 </body>
 </html>

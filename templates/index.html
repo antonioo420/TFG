@@ -20,18 +20,17 @@
         socket.on('info_update', function(data) {
             console.log("Recibido:", data);  // Para depuración
             
-            document.getElementById('informacion').innerHTML += '<li>IP: ' + data[0] + '</li>'
-                                                                '<li>IMSI: ' + data[1] + '</li>'
-                                                                '<li>APN: ' + data[2] + '</li>';
+            document.getElementById('informacion').innerHTML += `
+                <li>IP: ${data.ip}</li>
+                <li>IMSI: ${data.imsi}</li>
+                <li>APN: ${data.apn}</li>`;
         });
     </script>
 
-    <div id="informacion">
+    <div id="a">
         <p>UE conectado con la siguiente informacion:</p>
-        <ul>
-            <li>IP: {{ip}}</li>
-            <li>IMSI: {{imsi}}</li>
-            <li>APN: {{apn}}</li>
+        <ul id="informacion">
+            
         </ul>
     </div>
     <button type="button" onclick="window.location.href='/trafico'">Ir a Tráfico</button>
