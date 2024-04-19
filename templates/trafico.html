@@ -2,11 +2,45 @@
 <html>
 <head>
     <title>Trafico de Red en Tiempo Real</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/trafico.css') }}">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
 
     <h1>Trafico de Red en Tiempo Real</h1>
+    
+    <button id="continueTcpdump" class="btn btn-primary active" aria-pressed="true">Continuar Tcpdump</button>
+
+    <button id="stopTcpdump" class="btn btn-danger active" aria-pressed="true">Detener tcpdump</button>
+
+    <div id="trafico">
+        <!--Trafico-->
+    </div>
+    <div id="tabla_trafico" class="table-responsive">
+        <table id="trafico" class="table">
+            <thead>
+            <tr>
+                <th scope="col">Tiempo</th>
+                <th scope="col">IP origen</th>
+                <th scope="col">Puerto origen</th>
+                <th scope="col">IP destino</th>
+                <th scope="col">Puerto destino</th>
+                <th scope="col">Flags</th>
+                <th scope="col">seq</th>
+                <th scope="col">ack</th>
+                <th scope="col">win</th>
+                <th scope="col">options</th>
+                <th scope="col">Longitud</th>
+            </tr>
+            </thead>
+            <tbody id="fila_trafico">
+            
+            </tbody>
+        </table>
+    </div>
 
     <script type="text/javascript">
         
@@ -17,15 +51,45 @@
         });
 
         socket.on('trafico_update', function(data) {
-            console.log("Recibido:", data);  // Para depuración
-            
-            document.getElementById('trafico').innerHTML += '<li>' + data + '</li>';
+            //console.log("Recibido:", data);  // Para depuración            
+            var rowClass = '';            
+            if(data.type == "TCP"){
+                rowClass = 'fila_tcp';
+            } else if(data.type == "UDP"){
+                rowClass = 'fila_udp';
+            } else if(data.type == "DNS"){
+                rowClass = 'fila_dns';
+            }
+
+            document.getElementById('fila_trafico').innerHTML +=
+                '<tr class="' + rowClass + '">' +                 
+                '<th scope="row">' + data.timestamp + '</th>' +
+                '<td>' +data.src_ip + '</td>' +
+                '<td>' +data.src_port + '</td>' +
+                '<td>' +data.dst_ip + '</td>' +
+                '<td>' +data.dst_port + '</td>' +
+                '<td>' +data.flags + '</td>' +
+                '<td>' +data.seq + '</td>' +
+                '<td>' +data.ack + '</td>' +
+                '<td>' +data.win + '</td>' +
+                '<td>' +data.options + '</td>' +
+                '<td>' +data.len + '</td>' +
+                '</tr>';
         });
+
+        document.getElementById('stopTcpdump').addEventListener('click', function() {
+            console.log("Botón pulsado");
+            socket.emit('stop_tcpdump');
+        });
+
+        socket.on('tcpdump_stopped', function(message) {
+            alert(message);
+        });
+
+        document.getElementById('continueTcpdump').addEventListener('click', function() {
+            socket.emit('continue_tcpdump');
+        });
+
     </script>
-
-    <div id="trafico">
-        <!--Trafico-->
-    </div>
-
 </body>
 </html>

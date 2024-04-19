@@ -1,0 +1,49 @@
+body{
+    margin-left: 10px;
+    margin-top: 10px;
+}
+#tabla_trafico{
+    margin-right: 10px;
+    max-height: 600px; /* Altura máxima de la tabla */
+    overflow-y: auto;  /* Agregar deslizador vertical si es necesario */
+}
+
+#tabla_trafico::-webkit-scrollbar {
+    width: 10px; /* Ancho del scrollbar */
+}
+
+#tabla_trafico::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color del thumb (deslizador) */
+}
+
+#tabla_trafico {
+    scrollbar-color: #888 transparent; /* Color del thumb y track para Firefox */
+}
+
+button{
+    margin: 10px;
+}
+
+.fila_tcp{
+    background-color: #ccfff3;
+}
+
+.fila_tcp:hover{
+    background-color: #aaffeb;
+}
+
+.fila_udp{
+    background-color: #bbffc7;
+}
+
+.fila_udp:hover{
+    background-color: #a1ffb2;
+}
+
+.fila_dns{
+    background-color: #e1bcff;
+}
+
+.fila_dns:hover{
+    background-color: #cf95ff;
+}
