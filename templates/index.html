@@ -12,33 +12,36 @@
 <body>
     <h1>Información en Tiempo Real</h1>
 
-    <script type="text/javascript">
-    
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-    
-        socket.on('connect', function() {
-            console.log("Conectado al servidor index");
-        });
-    
-        socket.on('info_update', function(data) {
-            console.log("Recibido:", data);  // Para depuración
-            
-            document.getElementById('informacion').innerHTML += `
-                <li>IP: ${data.ip}</li>
-                <li>IMSI: ${data.imsi}</li>
-                <li>APN: ${data.apn}</li>`;
-        });
-    </script>
-
     <div id="a">
         <p>UE conectado con la siguiente informacion:</p>
         <ul id="informacion">
+            <!--
             <li>IP: {{ip}}</li>
             <li>IMSI: {{imsi}}</li>
             <li>APN: {{apn}}</li>
         </ul>
-        <p>Numero de UEs: {{ue}}</p>
+        <p>Numero de UEs: {{ue}}</p>-->
     </div>
     <button type="button" onclick="window.location.href='/trafico'">Ir a Tráfico</button>
 </body>
+
+<script type="text/javascript">
+    
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function() {
+        console.log("Conectado al servidor index");
+    });
+
+    socket.on('info_update', function(data) {
+        console.log("Recibido:", data);  // Para depuración
+        
+        document.getElementById('informacion').innerHTML += 
+            '<li>IP:' + data.ip +'</li>'+
+            '<li>IMSI:'+ data.imsi+'</li>'+
+            '<li>APN:' + data.apn + '</li>'
+            '<li>Num ues:' + data.ue + '</li>';
+    });
+</script>
+
 </html>

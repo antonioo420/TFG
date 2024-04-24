@@ -53,7 +53,7 @@ def obtener_informacion(nombre_archivo):
 def obtener_num_ues(nombre_archivo):
     global ue_mas_reciente
     linea_mas_reciente = ""
-    with open(nombre_archivo, 'rb') as file:
+    with open(nombre_archivo, 'r', encoding='ISO-8859–1') as file:
         for linea in file:
             if 'Number of gNB-UEs is now' in linea:
                 fecha_str = linea[:18]  # Extraer la fecha de la línea
@@ -68,21 +68,23 @@ def obtener_num_ues(nombre_archivo):
     return ue
 
 def actualizar_informacion():
+    time.sleep(2)
     global ip
     ip, apn, imsi = obtener_informacion(SMF)  
-    print('Emitiendo:', {'ip':ip, 'apn':apn, 'imsi':imsi})
-    socketio.emit('info_update', {'ip':ip, 'apn':apn, 'imsi':imsi})    
+    ue = obtener_num_ues(AMF)
+    print('Emitiendo:', {'ip':ip, 'apn':apn, 'imsi':imsi, 'ue':ue})
+    socketio.emit('info_update', {'ip':ip, 'apn':apn, 'imsi':imsi, 'ue':ue})    
     
 @app.route('/')
 def mostrar_informacion():    
-    # t2 = threading.Thread(target=actualizar_informacion)
-    # t2.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
-    # t2.start()   
-    global ip
-    stop_tcpdump() 
-    ip, apn, imsi = obtener_informacion(SMF)   
-    ue = obtener_num_ues(AMF) 
-    return render_template('index.html', ip=ip, apn=apn, imsi=imsi, ue=ue)
+    stop_tcpdump()
+    t2 = threading.Thread(target=actualizar_informacion)
+    t2.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
+    t2.start()  
+    #global ip
+    #ip, apn, imsi = obtener_informacion(SMF)   
+    #ue = obtener_num_ues(AMF) 
+    return render_template('index.html')
 
 def obtener_trafico():    
     global tcpdump_process
@@ -91,7 +93,7 @@ def obtener_trafico():
     
     for row in iter(tcpdump_process.stdout.readline, ''):
         if tcpdump_process:
-            #print(row)
+            print(row)
             yield parse_packet(row)
         else:
             break
@@ -100,7 +102,7 @@ def obtener_trafico():
 def actualizar_trafico():
     for row in obtener_trafico():            
         socketio.emit('trafico_update', row)
-        #print(json.dumps(row, indent=4))
+        print(json.dumps(row, indent=4))
         
 @app.route('/trafico')
 def mostrar_trafico():
