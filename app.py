@@ -10,6 +10,7 @@ from flask_cors import CORS
 import psutil
 import json
 from parser_tcpdump import parse_packet
+from file_read_backwards import FileReadBackwards
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -22,36 +23,58 @@ ue_mas_reciente = datetime(1,1,1,0,0)
 tcpdump_process = None
 
 ues = defaultdict(dict)
+ips = [] 
+#TODO: Hay que arreglar el manejo de estoo ______________________-----------------------------------------------------------
 
 def obtener_informacion(nombre_archivo):
     global ues
-    with open(nombre_archivo, 'r') as file:
-        lines = file.readlines()
-        reversed_lines = reversed(lines)
+    global ips
+    ips.clear()
+    with FileReadBackwards(nombre_archivo, encoding="utf-8") as file:
         ue_lines = []
         ue_removed = []
-        for line in reversed_lines:
+        for line in file:
             if 'IPv4' in line:
                 if 'Removed Session' in line:
                     ue_removed.append(line)
                 else:
                     ue_lines.append(line)
-    
-    #for line in ue_removed:
         
-        # ip, apn, imsi, timestamp = extraer_informacion(line)
-        # if timestamp > ues[imsi]['timestamp']:
-        #     print (line)
-        #     ues.pop(imsi, None)
-    for line in ue_lines:
-        ip,apn, imsi, timestamp = extraer_informacion(line)
-        ues = {
-            imsi: {
+    for line in ue_lines:           
+        ip,apn, imsi, timestamp_str = extraer_informacion(line)    
+        #Se comprueba que ese UE ya exista    
+        if imsi in ues:
+            timestamp = datetime.strptime(timestamp_str, '%m/%d %H:%M:%S.%f')
+            timestamp_guardado_str = ues[imsi]['timestamp']
+            timestamp_guardado = datetime.strptime(timestamp_guardado_str, '%m/%d %H:%M:%S.%f')
+            #Si existe una entrada más nueva de ese UE, se actualiza
+            if timestamp > timestamp_guardado:
+                ues[imsi] = {                  
+                    'ip': ip,
+                    'apn': apn,
+                    'timestamp': timestamp_str 
+                }
+                ips.append(ip)
+        else: #Si no existe el UE, se inserta            
+            ues[imsi] = {                  
                 'ip': ip,
                 'apn': apn,
-                'timestamp': timestamp 
+                'timestamp': timestamp_str 
             }
-        }
+            ips.append(ip)
+                
+    #En el caso de que se haya eliminado la conexión
+    for line in ue_removed:
+        ip, apn, imsi, timestamp_str = extraer_informacion(line)
+        #Se comprueba que haya una conexión activa del UE
+        if imsi in ues:            
+            timestamp = datetime.strptime(timestamp_str, '%m/%d %H:%M:%S.%f')
+            timestamp_guardado_str = ues[imsi]['timestamp']
+            timestamp_guardado = datetime.strptime(timestamp_guardado_str, '%m/%d %H:%M:%S.%f')
+            #Si la desconexión es posterior a la desconexión, se elimina el UE
+            if timestamp > timestamp_guardado:
+                ues.pop(imsi, None)
+                #ips.remove(ip)
                 
 def extraer_informacion(linea):
     ip_regex = r'IPv4\[(\d+\.\d+\.\d+\.\d+)\]'
@@ -63,13 +86,13 @@ def extraer_informacion(linea):
     imsi_match = re.search(imsi_regex, linea)
     
     fecha_str = linea[:18]  # Extraer la fecha de la línea
-    fecha = datetime.strptime(fecha_str, '%m/%d %H:%M:%S.%f')
+    
     
     # Extraer los valores
     ip = ip_match.group(1) if ip_match else None
     apn = apn_match.group(1) if apn_match else None
     imsi = imsi_match.group(1) if imsi_match else None
-    timestamp = fecha
+    timestamp = fecha_str
 
     return ip, apn, imsi, timestamp
 
@@ -97,8 +120,8 @@ def actualizar_informacion():
         global ues
         obtener_informacion(SMF)  
         num_ues = obtener_num_ues(AMF)
-        print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
-        socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues}) #timestamp no serializable xddddddddddddddddddddddddddddddd
+        #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
+        socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues})
         time.sleep(5)   
     
 @app.route('/')
@@ -109,10 +132,9 @@ def mostrar_informacion():
     t2.start()  
     return render_template('index.html')
 
-def obtener_trafico():    
-    global tcpdump_process
-    print('IP trafico: ', ip)
-    tcpdump_process = sub.Popen(['sudo', 'tcpdump', '-n', '-i', 'ogstun', '-l', 'host', str(ip)], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
+def obtener_trafico(ip):    
+    global tcpdump_process    
+    tcpdump_process = sub.Popen(['sudo', 'tcpdump', '-n', '-i', 'ogstun', '-l', 'host', ip], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
     
     for row in iter(tcpdump_process.stdout.readline, ''):
         if tcpdump_process:
@@ -122,8 +144,8 @@ def obtener_trafico():
             break
 
 @socketio.on('continue_tcpdump')
-def actualizar_trafico():
-    for row in obtener_trafico():            
+def actualizar_trafico(data):
+    for row in obtener_trafico(data['selectedIp']):            
         socketio.emit('trafico_update', row)
         #print(json.dumps(row, indent=4))
         
@@ -132,7 +154,8 @@ def mostrar_trafico():
     t = threading.Thread(target=actualizar_trafico)
     t.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
     t.start()
-    return render_template('trafico.html')
+    global ips
+    return render_template('trafico.html', ips=ips)
 
 @socketio.on('connect')
 def handle_connect():

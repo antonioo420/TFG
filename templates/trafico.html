@@ -1,9 +1,16 @@
 {%extends "layout.html"%}
 
 {%block content%}
-    <h1>Trafico de Red en Tiempo Real</h1>
-    
-    <button id="continueTcpdump" class="btn btn-primary active" aria-pressed="true">Continuar captura</button>
+    <h1>Tráfico de Red en Tiempo Real</h1>
+
+    <select id="select-ip" class="form-select">
+        <option selected>Selecciona una IP</option>
+        {% for ip in ips %}
+            <option value="{{ ip }}">{{ ip }}</option>
+        {% endfor %}
+    </select>
+
+    <button id="continueTcpdump" class="btn btn-primary active" aria-pressed="true">Iniciar captura</button>
 
     <button id="stopTcpdump" class="btn btn-danger active" aria-pressed="true">Detener captura</button>
 
@@ -77,7 +84,8 @@
         });
 
         document.getElementById('continueTcpdump').addEventListener('click', function() {
-            socket.emit('continue_tcpdump');
+            var selectedIp = document.getElementById('select-ip').value;
+            socket.emit('continue_tcpdump', { selectedIp: selectedIp });
         });
 
     </script>

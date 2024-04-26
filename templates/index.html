@@ -3,14 +3,18 @@
 {%block content%}
     <h1>Información en Tiempo Real</h1>
 
-    <div id="a">
+    <div id="num_ues">
+    </div>
+
+    <div id="UEs">
         <p>UE conectado con la siguiente informacion:</p>
         <ul id="informacion">
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-        </ul>
+        </ul>        
     </div>
+    
     <button type="button" onclick="window.location.href='/trafico'">Ir a Tráfico</button>
 
     <script type="text/javascript">
@@ -24,12 +28,25 @@
         socket.on('info_update', function(data) {
             console.log("Recibido:", data);  // Para depuración
             
-            document.getElementById('informacion').innerHTML = 
-                '<li>IP:' + data.ip +'</li>'+
-                '<li>IMSI:'+ data.imsi+'</li>'+
-                '<li>APN:' + data.apn + '</li>'+
-                '<li>Num ues:' + data.ue + '</li>';
+            // Limpiar el contenido previo
+            document.getElementById('informacion').innerHTML = '';
+
+            // Iterar sobre el diccionario de UEs
+            for (const imsi in data.ues) {
+                if (data.ues.hasOwnProperty(imsi)) {
+                    const ue = data.ues[imsi];
+                    const html = '<li>IP: ' + ue.ip + '</li>' +
+                                '<li>IMSI: ' + imsi + '</li>' +
+                                '<li>APN: ' + ue.apn + '</li> <br>';
+
+                    // Agregar la información de cada UE al elemento 'informacion'
+                    document.getElementById('informacion').innerHTML += html;
+                }
+            }
+            // Mostrar el número total de UEs
+            document.getElementById('num_ues').innerHTML = 'Número de UEs: ' + data.num_ues;
         });
+        
     </script>
 {%endblock%}
 
