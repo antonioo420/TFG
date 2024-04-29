@@ -7,8 +7,6 @@ import re
 import subprocess as sub
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-import psutil
-import json
 from parser_tcpdump import parse_packet
 from file_read_backwards import FileReadBackwards
 
@@ -55,6 +53,7 @@ def obtener_informacion(nombre_archivo):
                     'timestamp': timestamp_str 
                 }
                 ips.append(ip)
+                print(ips)
         else: #Si no existe el UE, se inserta            
             ues[imsi] = {                  
                 'ip': ip,
@@ -62,6 +61,7 @@ def obtener_informacion(nombre_archivo):
                 'timestamp': timestamp_str 
             }
             ips.append(ip)
+            print(ips)
                 
     #En el caso de que se haya eliminado la conexión
     for line in ue_removed:
@@ -74,7 +74,7 @@ def obtener_informacion(nombre_archivo):
             #Si la desconexión es posterior a la desconexión, se elimina el UE
             if timestamp > timestamp_guardado:
                 ues.pop(imsi, None)
-                #ips.remove(ip)
+                ips.remove(ip)
                 
 def extraer_informacion(linea):
     ip_regex = r'IPv4\[(\d+\.\d+\.\d+\.\d+)\]'
@@ -131,6 +131,13 @@ def mostrar_informacion():
     t2.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
     t2.start()  
     return render_template('index.html')
+        
+@app.route('/trafico')
+def mostrar_trafico():
+    global ips
+    print('Ips enviadas')
+    print(ips)
+    return render_template('trafico.html', ips=ips)
 
 def obtener_trafico(ip):    
     global tcpdump_process    
@@ -148,18 +155,6 @@ def actualizar_trafico(data):
     for row in obtener_trafico(data['selectedIp']):            
         socketio.emit('trafico_update', row)
         #print(json.dumps(row, indent=4))
-        
-@app.route('/trafico')
-def mostrar_trafico():
-    t = threading.Thread(target=actualizar_trafico)
-    t.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
-    t.start()
-    global ips
-    return render_template('trafico.html', ips=ips)
-
-@socketio.on('connect')
-def handle_connect():
-    print('Cliente conectado')
 
 @socketio.on('stop_tcpdump')
 def stop_tcpdump():
@@ -169,6 +164,11 @@ def stop_tcpdump():
         tcpdump_process = None
         print("Tcpdump detenido")
         socketio.emit('tcpdump_stopped', "Tcpdump detenido")
+
+
+@socketio.on('connect')
+def handle_connect():
+    print('Cliente conectado')
 
 if __name__ == '__main__':    
     socketio.run(app, debug=True)
