@@ -22,7 +22,6 @@ tcpdump_process = None
 
 ues = defaultdict(dict)
 ips = [] 
-#TODO: Hay que arreglar el manejo de estoo ______________________-----------------------------------------------------------
 
 def obtener_informacion(nombre_archivo):
     global ues
@@ -46,7 +45,7 @@ def obtener_informacion(nombre_archivo):
             timestamp_guardado_str = ues[imsi]['timestamp']
             timestamp_guardado = datetime.strptime(timestamp_guardado_str, '%m/%d %H:%M:%S.%f')
             #Si existe una entrada más nueva de ese UE, se actualiza
-            if timestamp > timestamp_guardado:
+            if timestamp >= timestamp_guardado:
                 ues[imsi] = {                  
                     'ip': ip,
                     'apn': apn,
@@ -74,7 +73,8 @@ def obtener_informacion(nombre_archivo):
             #Si la desconexión es posterior a la desconexión, se elimina el UE
             if timestamp > timestamp_guardado:
                 ues.pop(imsi, None)
-                ips.remove(ip)
+                if ip in ips:
+                    ips.remove(ip)
                 
 def extraer_informacion(linea):
     ip_regex = r'IPv4\[(\d+\.\d+\.\d+\.\d+)\]'
