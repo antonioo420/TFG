@@ -1,0 +1,27 @@
+.informacion {
+    background-color: #f0f0f0; /* Color de fondo */
+    border: 1px solid #ccc; /* Borde del div */
+    padding: 20px; /* Espaciado interno */
+    margin: 20px; /* Espaciado externo inferior */
+    border-radius: 5px; /* Bordes redondeados */
+    width:30%;
+    
+}
+
+#UEs{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#UEs p {
+    font-size: 18px; /* Tamaño de fuente del párrafo */    
+}
+
+#num_ues{
+    font-size: 30px;
+}
+
+#tabla_log{    
+    max-height: 100px; /* Altura máxima de la tabla */
+    overflow-y: auto;  /* Agregar deslizador vertical si es necesario */
+}

@@ -1,21 +1,32 @@
 {% extends "layout.html" %}
 
-{%block content%}
-    <h1>Información en Tiempo Real</h1>
+{%block content%}    
 
     <div id="num_ues">
+        UEs conectados: <span id="num"></span>
     </div>
+
+    <button id="startLog" class="btn btn-primary active" aria-pressed="true">Iniciar log</button>
+    <button id="stopLog" class="btn btn-primary active" aria-pressed="true">Detener log</button>
 
     <div id="UEs">
         <p>UE conectado con la siguiente informacion:</p>
-        <ul id="informacion">
+        <!-- <ul id="informacion">
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-        </ul>        
+        </ul>   -->      
+    </div>        
+
+    <div id="log">
+        <table id="tabla_log" class="table">
+            <tbody id="body">
+            <tr id="fila_log">
+
+            </tr>
+            </tbody>
+        </table>
     </div>
-    
-    <button type="button" onclick="window.location.href='/trafico'">Ir a Tráfico</button>
 
     <script type="text/javascript">
     
@@ -29,24 +40,50 @@
             console.log("Recibido:", data);  // Para depuración
             
             // Limpiar el contenido previo
-            document.getElementById('informacion').innerHTML = '';
+            document.getElementById('UEs').innerHTML = '';
 
-            // Iterar sobre el diccionario de UEs
             for (const imsi in data.ues) {
                 if (data.ues.hasOwnProperty(imsi)) {
                     const ue = data.ues[imsi];
-                    const html = '<li>IP: ' + ue.ip + '</li>' +
-                                '<li>IMSI: ' + imsi + '</li>' +
-                                '<li>APN: ' + ue.apn + '</li> <br>';
+                    const div = document.createElement('div');
+                    div.className = 'informacion';
+                    div.innerHTML = '<p>UE conectado con la siguiente información:</p>' +
+                                    '<p>IP: ' + ue.ip + '</p>' +
+                                    '<p>IMSI: ' + imsi + '</p>' +
+                                    '<p>APN: ' + ue.apn + '</p><br>';
 
                     // Agregar la información de cada UE al elemento 'informacion'
-                    document.getElementById('informacion').innerHTML += html;
+                    document.getElementById('UEs').appendChild(div);
                 }
             }
             // Mostrar el número total de UEs
-            document.getElementById('num_ues').innerHTML = 'Número de UEs: ' + data.num_ues;
+            document.getElementById('num').innerHTML = data.num_ues;
         });
         
+        document.getElementById('startLog').addEventListener('click', function() {
+            console.log("Botón pulsado");
+            socket.emit('start_log');
+        });
+
+        document.getElementById('stopLog').addEventListener('click', function() {
+            console.log("Botón pulsado");
+            socket.emit('stop_log');
+        });
+
+        socket.on('log_stopped', function(message) {
+            alert(message);
+        });
+
+        socket.on('log_update', function(data) {
+            var row = document.createElement('tr');
+            row.className = "";
+
+            var logLine = document.createElement('td');
+            logLine.textContent = data.line;
+
+            document.getElementById('body').appendChild(row);
+            row.appendChild(logLine);
+        });
     </script>
 {%endblock%}
 

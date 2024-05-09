@@ -1,5 +1,6 @@
 from collections import defaultdict
-from flask import Flask, render_template, Response
+import os
+from flask import Flask, render_template, Response, request
 import time
 import threading
 from datetime import datetime
@@ -7,6 +8,7 @@ import re
 import subprocess as sub
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
+from dummy import addDummy
 from parser_tcpdump import parse_packet
 from file_read_backwards import FileReadBackwards
 
@@ -19,7 +21,7 @@ SMF = '/var/log/open5gs/smf.log'
 AMF = '/var/log/open5gs/amf.log'
 ue_mas_reciente = datetime(1,1,1,0,0)
 tcpdump_process = None
-
+stop_log=False
 ues = defaultdict(dict)
 ips = [] 
 
@@ -121,8 +123,10 @@ def actualizar_informacion():
         obtener_informacion(SMF)  
         num_ues = obtener_num_ues(AMF)
         #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
+        addDummy(ues)
         socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues})
         time.sleep(5)   
+
     
 @app.route('/')
 def mostrar_informacion():    
@@ -130,14 +134,16 @@ def mostrar_informacion():
     t2 = threading.Thread(target=actualizar_informacion)
     t2.daemon = True  # Hacer que el thread se detenga cuando la aplicación Flask se detenga
     t2.start()  
-    return render_template('index.html')
+    current_path = request.path
+    return render_template('index.html', current_path = current_path)
         
 @app.route('/trafico')
 def mostrar_trafico():
     global ips
     print('Ips enviadas')
     print(ips)
-    return render_template('trafico.html', ips=ips)
+    current_path = request.path
+    return render_template('trafico.html', ips=ips, current_path = current_path)
 
 def obtener_trafico(ip):    
     global tcpdump_process    
@@ -169,6 +175,41 @@ def stop_tcpdump():
 @socketio.on('connect')
 def handle_connect():
     print('Cliente conectado')
+
+@socketio.on('start_log')
+def show_log():
+    global AMF
+    global stop_log
+    log_file = AMF    
+    stop_log = False
+    try:
+        file_size = os.path.getsize(log_file)
+
+        with open(log_file, 'r', encoding='latin-1') as f:
+            while True:
+                if stop_log == False:
+                    # Verificar si el tamaño del archivo ha cambiado (nueva entrada)
+                    current_size = os.path.getsize(log_file)
+                    if current_size >= file_size:
+                        # Ir a la última posición en el archivo
+                        f.seek(file_size)
+                        # Leer y enviar nuevas líneas
+                        for line in f.readlines():
+                            socketio.emit('log_update', {'line': line})
+                        # Actualizar el tamaño del archivo
+                        file_size = current_size
+                    # Esperar antes de volver a verificar el archivo
+                    time.sleep(1)
+                else:
+                    break
+    except Exception as e:
+        print("Error al leer el archivo de log:", e)
+
+@socketio.on('stop_log')
+def stop_log():
+    global stop_log 
+    stop_log = True
+    socketio.emit('log_stopped', "Captura de log detenida")
 
 if __name__ == '__main__':    
     socketio.run(app, debug=True)
