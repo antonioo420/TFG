@@ -75,6 +75,7 @@
         });
 
         socket.on('log_update', function(data) {
+            console.log("Recibido entrada log", data);
             var row = document.createElement('tr');
             row.className = "";
 

@@ -123,7 +123,7 @@ def actualizar_informacion():
         obtener_informacion(SMF)  
         num_ues = obtener_num_ues(AMF)
         #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
-        addDummy(ues)
+        #addDummy(ues)
         socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues})
         time.sleep(5)   
 
@@ -177,7 +177,7 @@ def handle_connect():
     print('Cliente conectado')
 
 @socketio.on('start_log')
-def show_log():
+def show_log():    
     global AMF
     global stop_log
     log_file = AMF    
@@ -188,13 +188,16 @@ def show_log():
         with open(log_file, 'r', encoding='latin-1') as f:
             while True:
                 if stop_log == False:
-                    # Verificar si el tamaño del archivo ha cambiado (nueva entrada)
+                    # Verificar si el tamaño del archivo ha cambiado (=nueva entrada)
                     current_size = os.path.getsize(log_file)
-                    if current_size >= file_size:
+                    if current_size >= file_size:                        
                         # Ir a la última posición en el archivo
                         f.seek(file_size)
                         # Leer y enviar nuevas líneas
+                        list = f.readlines()
+                        print(list)
                         for line in f.readlines():
+                            print(line)
                             socketio.emit('log_update', {'line': line})
                         # Actualizar el tamaño del archivo
                         file_size = current_size
