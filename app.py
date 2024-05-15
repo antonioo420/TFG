@@ -6,7 +6,7 @@ import threading
 from datetime import datetime
 import re
 import subprocess as sub
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 from flask_cors import CORS
 from dummy import addDummy
 from parser_tcpdump import parse_packet
@@ -122,7 +122,7 @@ def actualizar_informacion():
         global ues
         obtener_informacion(SMF)  
         num_ues = obtener_num_ues(AMF)
-        print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
+        #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
         addDummy(ues)
         socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues})
         time.sleep(5)   
