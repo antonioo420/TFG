@@ -103,7 +103,7 @@ def obtener_num_ues(nombre_archivo):
     linea_mas_reciente = ""
     with open(nombre_archivo, 'r', encoding='ISO-8859–1') as file:
         for linea in file:
-            if 'Number of AMF-Sessions is now' in linea:
+            if 'Number of gNB-UEs is now' in linea:
                 fecha_str = linea[:18]  # Extraer la fecha de la línea
                 fecha = datetime.strptime(fecha_str, '%m/%d %H:%M:%S.%f')  # Convertir la cadena de fecha a un objeto datetime
                 if fecha >= ue_mas_reciente:
@@ -123,7 +123,7 @@ def actualizar_informacion():
         obtener_informacion(SMF)  
         num_ues = obtener_num_ues(AMF)
         #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
-        addDummy(ues)
+        #addDummy(ues)
         socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues})
         time.sleep(5)   
 

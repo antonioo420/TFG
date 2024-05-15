@@ -4,10 +4,7 @@
 
     <div id="num_ues">
         UEs conectados: <span id="num"></span>
-    </div>
-
-    <button id="startLog" class="btn btn-primary active" aria-pressed="true">Iniciar log</button>
-    <button id="stopLog" class="btn btn-primary active" aria-pressed="true">Detener log</button>
+    </div>    
 
     <div id="UEs">
         <p>UE conectado con la siguiente informacion:</p>
@@ -18,7 +15,12 @@
         </ul>   -->      
     </div>        
 
+    <button id="startLog" class="btn btn-primary active" aria-pressed="true">Iniciar log</button>
+    <button id="stopLog" class="btn btn-primary active" aria-pressed="true">Detener log</button>
+
     <div id="log">
+        <p id="titulo_log">amf.log</p>
+        
         <table id="tabla_log" class="table">
             <tbody id="body">
             <tr id="fila_log">
@@ -72,7 +74,7 @@
 
         socket.on('log_stopped', function(message) {
             alert(message); 
-        });
+        });        
 
         socket.on('log_update', function(data) {
             var row = document.createElement('tr');
@@ -82,7 +84,7 @@
             logLine.textContent = data.line;
 
             document.getElementById('body').appendChild(row);
-            row.appendChild(logLine);
+            row.appendChild(logLine);            
         });
     </script>
 {%endblock%}

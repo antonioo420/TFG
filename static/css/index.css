@@ -21,7 +21,58 @@
     font-size: 30px;
 }
 
-#tabla_log{    
-    max-height: 100px; /* Altura máxima de la tabla */
-    overflow-y: auto;  /* Agregar deslizador vertical si es necesario */
+#log {
+    background-color: black; /* Color de fondo de la "terminal" */    
+    height: 500px; /* Tamaño fijo del recuadro */
+    overflow-y: auto; /* Agregar deslizador vertical si es necesario */
+    font-family: 'Courier New', Courier, monospace; /* Fuente de estilo de terminal */
+    line-height: 1; /* Altura de línea */
+    position: relative; /* Establecer posición relativa para posicionar el título */
+}
+
+#titulo_log {
+    position: sticky; 
+    top: 0; 
+    left: 0;
+    padding: 10px;
+    color: white; 
+    background-color: #555;
+}
+
+#log * {
+    color: white !important; /* Aplicar color blanco a todos los elementos hijos */
+}
+
+#tabla_log {
+    width: 100%;
+    max-height: 100%; 
+}
+
+#tabla_log tbody {
+    display: block; 
+    overflow-y: auto; 
+}
+
+#tabla_log tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;    
+}
+
+#tabla_log td, #tabla_log th {
+    border: none; /* Eliminar borde de las celdas de la tabla */
+}
+
+/* Personalización del deslizador */
+#tabla_log::-webkit-scrollbar {
+    width: 10px;
+}
+
+#tabla_log::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 5px;
+}
+
+#tabla_log::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
 }
