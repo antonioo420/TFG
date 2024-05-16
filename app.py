@@ -54,7 +54,7 @@ def obtener_informacion(nombre_archivo):
                     'timestamp': timestamp_str 
                 }
                 ips.append(ip)
-                print(ips)
+                #print(ips)
         else: #Si no existe el UE, se inserta            
             ues[imsi] = {                  
                 'ip': ip,
@@ -62,7 +62,7 @@ def obtener_informacion(nombre_archivo):
                 'timestamp': timestamp_str 
             }
             ips.append(ip)
-            print(ips)
+            #print(ips)
                 
     #En el caso de que se haya eliminado la conexión
     for line in ue_removed:
@@ -123,7 +123,7 @@ def actualizar_informacion():
         obtener_informacion(SMF)  
         num_ues = obtener_num_ues(AMF)
         #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
-        #addDummy(ues)
+        addDummy(ues)
         socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues})
         time.sleep(5)   
 
@@ -141,7 +141,7 @@ def mostrar_informacion():
 def mostrar_trafico():
     global ips
     print('Ips enviadas')
-    print(ips)
+    #print(ips)
     current_path = request.path
     return render_template('trafico.html', ips=ips, current_path = current_path)
 
@@ -179,8 +179,9 @@ def handle_connect():
 @socketio.on('start_log')
 def show_log():    
     global AMF
+    #global SMF
     global stop_log
-    log_file = AMF    
+    log_file = AMF
     stop_log = False
     try:
         file_size = os.path.getsize(log_file)
@@ -193,12 +194,10 @@ def show_log():
                     if current_size >= file_size:                        
                         # Ir a la última posición en el archivo
                         f.seek(file_size)
-                        # Leer y enviar nuevas líneas
-                        list = f.readlines()
-                        print(list)
-                        for line in f.readlines():
-                            print(line)
+                        # Leer y enviar nuevas líneas                                                
+                        for line in f.readlines():                            
                             socketio.emit('log_update', {'line': line})
+                            print(line)
                         # Actualizar el tamaño del archivo
                         file_size = current_size
                     # Esperar antes de volver a verificar el archivo
@@ -213,6 +212,10 @@ def stop_log():
     global stop_log 
     stop_log = True
     socketio.emit('log_stopped', "Captura de log detenida")
+
+@app.route('/prueba')
+def pruebas():
+    return render_template('prueba.html')
 
 if __name__ == '__main__':    
     socketio.run(app, debug=True)

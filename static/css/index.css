@@ -5,12 +5,16 @@
     margin: 20px; /* Espaciado externo inferior */
     border-radius: 5px; /* Bordes redondeados */
     width:30%;
-    
+    height: 200px;    
 }
 
 #UEs{
     display: flex;
     flex-wrap: wrap;
+    height: 500px;
+    background-color: lightblue;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 #UEs p {
@@ -28,24 +32,28 @@
     font-family: 'Courier New', Courier, monospace; /* Fuente de estilo de terminal */
     line-height: 1; /* Altura de línea */
     position: relative; /* Establecer posición relativa para posicionar el título */
+    margin-top: 0;
 }
 
-#titulo_log {
-    position: sticky; 
-    top: 0; 
-    left: 0;
+.titulo_log {      
+    display: flex;  
+    justify-content: space-between;    
     padding: 10px;
+    padding-bottom: 0;
+    margin-bottom: 0;
     color: white; 
     background-color: #555;
-}
+}    
 
 #log * {
     color: white !important; /* Aplicar color blanco a todos los elementos hijos */
+    background-color: black; /* Color de fondo de la "terminal" */        
 }
 
 #tabla_log {
     width: 100%;
     max-height: 100%; 
+    background-color: black; /* Color de fondo de la "terminal" */    
 }
 
 #tabla_log tbody {
