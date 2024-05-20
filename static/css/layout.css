@@ -1,0 +1,31 @@
+body{
+    margin:0;
+    padding-top: 40px;
+}
+#navbar{          
+    position: fixed; 
+    top: 0;
+    left: 0;
+    box-shadow: 10px 10px 10px #d4d4d4;
+    margin: 0px;        
+    padding: 10px;                
+    display: flex;
+    justify-content: center;
+    background-color: white;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.nav-left img {
+    height: 40px; /* Ajusta el tamaño de la imagen según sea necesario */
+    margin-right: 10px;
+}
+
+.nav-right a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: black; /* Ajusta el color de los enlaces según sea necesario */
+}

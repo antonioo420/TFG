@@ -11,8 +11,9 @@
 #UEs{
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-evenly left;
     height: 500px;
-    background-color: lightblue;
+    background-color: rgb(182, 182, 182);
     margin-top: 15px;
     margin-bottom: 15px;
 }
@@ -83,4 +84,8 @@
 
 #tabla_log::-webkit-scrollbar-thumb:hover {
     background-color: #555;
+}
+
+#spinner{
+    margin: 10px;
 }

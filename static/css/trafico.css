@@ -2,11 +2,6 @@ body{
     margin-left: 10px;
     margin-top: 10px;
 }
-#tabla_trafico{
-    margin-right: 10px;
-    max-height: 600px; /* Altura máxima de la tabla */
-    overflow-y: auto;  /* Agregar deslizador vertical si es necesario */
-}
 
 #tabla_trafico::-webkit-scrollbar {
     width: 10px; /* Ancho del scrollbar */
@@ -16,8 +11,29 @@ body{
     background-color: #888; /* Color del thumb (deslizador) */
 }
 
-#tabla_trafico {
+#tabla_trafico {    
+    height: 600px; 
+    overflow-y: auto;  
     scrollbar-color: #888 transparent; /* Color del thumb y track para Firefox */
+    border: 1px solid #d4d4d4;
+    border-radius: 10px;
+}
+
+#trafico {
+    width: 100%;
+    text-align: left;
+}
+
+#trafico thead tr {    
+    position: sticky;
+    top: 0;
+    background-color: white;
+    text-align: left;
+    font-weight: bold;
+}
+
+#trafico th, #trafico td {
+    padding: 12px 15px; /* Relleno interno para mayor espacio */    
 }
 
 button{
