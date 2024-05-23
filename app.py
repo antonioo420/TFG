@@ -20,6 +20,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", namespace='/trafico')
 SMF = '/var/log/open5gs/smf.log'
 AMF = '/var/log/open5gs/amf.log'
 ue_mas_reciente = datetime(1,1,1,0,0)
+apn_mas_reciente = datetime(1,1,1,0,0)
 tcpdump_process = None
 stop_log=False
 ues = defaultdict(dict)
@@ -122,12 +123,30 @@ def actualizar_informacion():
         global ues
         obtener_informacion(SMF)  
         num_ues = obtener_num_ues(AMF)
-        #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
+        apn = comprobar_apn(AMF)
+        print('Emitiendo:', {'ues':ues, 'num_ues':num_ues})
         addDummy(ues)
-        socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues})
+        socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues, 'apn': apn})
         time.sleep(5)   
 
-    
+def comprobar_apn(nombre_archivo):
+    global apn_mas_reciente
+    linea_mas_reciente = ""
+    with open(nombre_archivo, 'r', encoding='ISO-8859–1') as file:
+        for linea in file:
+            if 'Number of gNBs is now' in linea:
+                fecha_str = linea[:18]  # Extraer la fecha de la línea
+                fecha = datetime.strptime(fecha_str, '%m/%d %H:%M:%S.%f')  # Convertir la cadena de fecha a un objeto datetime
+                if fecha >= apn_mas_reciente:
+                    apn_mas_reciente = fecha
+                    linea_mas_reciente = linea
+
+    #print(linea_mas_reciente)
+    match = re.search(r'is now (\d+)', linea_mas_reciente)
+    apn = match.group(1) if match else None
+
+    return apn
+
 @app.route('/')
 def mostrar_informacion():    
     stop_tcpdump()
@@ -143,7 +162,8 @@ def mostrar_trafico():
     print('Ips enviadas')
     #print(ips)
     current_path = request.path
-    return render_template('trafico.html', ips=ips, current_path = current_path)
+    select_value = request.args.get('select_value', 'opcion1')
+    return render_template('trafico.html', ips=ips, current_path = current_path, select_value=select_value)
 
 def obtener_trafico(ip):    
     global tcpdump_process    
@@ -213,9 +233,11 @@ def stop_log():
     stop_log = True
     socketio.emit('log_stopped', "Captura de log detenida")
 
-@app.route('/prueba')
+@app.route('/analisis')
 def pruebas():
-    return render_template('prueba.html')
+    current_path = request.path
+    return render_template('analisis.html', current_path=current_path)
 
 if __name__ == '__main__':    
     socketio.run(app, debug=True)
+

@@ -23,9 +23,13 @@
             <a class="navbar-brand" href="/">                
                 <img src="/static/images/open5gs-logo-only.png" alt="Logo" width="30" height="30" class="d-inline-block align-text">
                 {% if current_path == '/' %}
-                    Información en tiempo real
+                    Información de la red
                 {% else %}
-                    Tráfico en tiempo real
+                    {% if current_path == '/analisis' %}
+                        Análisis en tiempo real
+                    {% else %}
+                        Tráfico en tiempo real
+                    {% endif %}
                 {% endif %}
             </a>
             <ul class="navbar-nav ms-auto">
@@ -36,7 +40,7 @@
                     <a class="nav-link" href="/trafico">Tráfico</a> 
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="http://localhost:3333/d/u2cP1UaMz/ntopng-network-status?orgId=1&refresh=5s&from=1716204010634&to=1716205810635">Análisis</a>                     
+                    <a class="nav-link" href="/analisis">Análisis</a>                     
                 </li>
                 </li>
             </ul>

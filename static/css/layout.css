@@ -1,22 +1,19 @@
-body{
-    margin:0;
-    padding-top: 40px;
-}
-#navbar{          
-    position: fixed; 
-    top: 0;
-    left: 0;
-    box-shadow: 10px 10px 10px #d4d4d4;
-    margin: 0px;        
-    padding: 10px;                
+
+#navbar{                
+    display: block;
+    padding: 15px;           
     display: flex;
     justify-content: center;
-    background-color: white;
-}
+    margin-top: -8px;
 
+}
+#navbar *{
+    font-size: x-large;   /*TODO: Revisar esto*/
+}
 .nav-left {
     display: flex;
     align-items: center;
+
 }
 
 .nav-left img {

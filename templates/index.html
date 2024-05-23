@@ -2,16 +2,25 @@
 
 {%block content%}    
 
-    <div id="num_ues">
-        UEs conectados: <span id="num"></span>
-    </div>    
+    <div id="apn">
+        <img src="/static/images/gnb.png" alt="Icono gnb" height="60" width="40">
+        APN <span id="apn_activo"> </span>
+        <img src="" id="apn_estado" height="15" width="15">
+    </div>
 
-    
-    <div id="UEs">                 
-        <div class="spinner-border" role="status" id="spinner">
-            <span class="visually-hidden">Loading...</span>
+    <div id="ues_block">
+        <div id="num_ues">
+            <img src="/static/images/smartphone.webp" alt="Icono smartphone" height="40"  width="35">
+            UEs conectados: <span id="num"></span>
+        </div>    
+
+        <div id="UEs">                 
+            <div class="spinner-border" role="status" id="spinner">
+                <span class="visually-hidden">Loading...</span>                
             </div>        
-    </div>        
+            
+        </div>        
+    </div>
 
     <div class="titulo_log">        
         <p data-bs-toggle="collapse" data-bs-target="#log" aria-expanded="false" aria-controls="log">
@@ -65,7 +74,8 @@
                     div.innerHTML = '<p>UE conectado con la siguiente información:</p>' +
                                     '<p>IP: ' + ue.ip + '</p>' +
                                     '<p>IMSI: ' + imsi + '</p>' +
-                                    '<p>APN: ' + ue.apn + '</p><br>';
+                                    '<p>APN: ' + ue.apn + '</p><br>'+
+                                    '<a href="/trafico?select_value='+ue.ip+'">Ir a Tráfico</a>';
 
                     // Agregar la información de cada UE al elemento 'informacion'
                     document.getElementById('UEs').appendChild(div);
@@ -73,6 +83,14 @@
             }
             // Mostrar el número total de UEs
             document.getElementById('num').innerHTML = data.num_ues;
+            
+            if(data.apn == "1"){
+                document.getElementById('apn_activo').innerHTML = "Activo";
+                document.getElementById('apn_estado').src="/static/images/puntoverde.png";
+            }else if(data.apn == "0"){
+                document.getElementById('apn_activo').innerHTML = "Inactivo";
+                document.getElementById('apn_estado').src="/static/images/puntorojo.png";
+            }
         });        
 
         document.getElementById('amf_switch').addEventListener('change', function() {
@@ -100,6 +118,11 @@
             document.getElementById('body').appendChild(row);
             row.appendChild(logLine);            
         });
+
+        function navigateToTrafico(ip) {            
+            // Navegar a la nueva página con el parámetro en la URL
+            window.location.href = `/trafico?select_value=${ip}`;
+        }
     </script>
 {%endblock%}
 

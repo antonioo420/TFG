@@ -5,7 +5,10 @@
     <select id="select-ip" class="form-select">
         <option selected>Selecciona una IP</option>
         {% for ip in ips %}
-            <option value="{{ ip }}">{{ ip }}</option>
+            <option value="{{ ip }}" 
+            {% if select_value == ip %} selected="selected" {% endif %} >            
+            {{ ip }}</option>
+            
         {% endfor %}
     </select>
 

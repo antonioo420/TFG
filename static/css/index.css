@@ -1,11 +1,22 @@
 .informacion {
-    background-color: #f0f0f0; /* Color de fondo */
+    background-color: white; /* Color de fondo */
     border: 1px solid #ccc; /* Borde del div */
     padding: 20px; /* Espaciado interno */
     margin: 20px; /* Espaciado externo inferior */
     border-radius: 5px; /* Bordes redondeados */
-    width:30%;
-    height: 200px;    
+    width:30%;     
+}
+
+#apn{
+    margin-bottom: 15px;
+    margin-left: 15px;
+    font-size: xx-large;
+}
+
+#ues_block{
+    border: 1px solid #d4d4d4;
+    border-radius: 10px;
+    margin-bottom: 15px;
 }
 
 #UEs{
@@ -13,9 +24,7 @@
     flex-wrap: wrap;
     justify-content: space-evenly left;
     height: 500px;
-    background-color: rgb(182, 182, 182);
-    margin-top: 15px;
-    margin-bottom: 15px;
+    background-color: rgb(215, 247, 255);        
 }
 
 #UEs p {
@@ -23,7 +32,13 @@
 }
 
 #num_ues{
-    font-size: 30px;
+    font-size: x-large;
+    margin-left: 10px;
+    padding: 10px;
+}
+
+#num_ues img{
+    margin-right: 10px;
 }
 
 #log {
