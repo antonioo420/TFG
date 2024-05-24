@@ -8,8 +8,9 @@
 
 }
 #navbar *{
-    font-size: x-large;   /*TODO: Revisar esto*/
+    font-size: large;   /*TODO: Revisar esto*/
 }
+
 .nav-left {
     display: flex;
     align-items: center;

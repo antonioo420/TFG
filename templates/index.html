@@ -17,8 +17,7 @@
         <div id="UEs">                 
             <div class="spinner-border" role="status" id="spinner">
                 <span class="visually-hidden">Loading...</span>                
-            </div>        
-            
+            </div>                    
         </div>        
     </div>
 
@@ -74,7 +73,7 @@
                     div.innerHTML = '<p>UE conectado con la siguiente información:</p>' +
                                     '<p>IP: ' + ue.ip + '</p>' +
                                     '<p>IMSI: ' + imsi + '</p>' +
-                                    '<p>APN: ' + ue.apn + '</p><br>'+
+                                    '<p>APN: ' + ue.apn + '</p>'+
                                     '<a href="/trafico?select_value='+ue.ip+'">Ir a Tráfico</a>';
 
                     // Agregar la información de cada UE al elemento 'informacion'

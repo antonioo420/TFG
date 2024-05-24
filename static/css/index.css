@@ -5,6 +5,16 @@
     margin: 20px; /* Espaciado externo inferior */
     border-radius: 5px; /* Bordes redondeados */
     width:30%;     
+    height: 50%;
+}
+
+.informacion a{        
+    padding: 8px;
+    border: 1px solid #f1f1f1;
+    border-radius: 3px;
+    color: white;
+    background-color: rgb(134, 184, 255);
+    text-decoration: none;    
 }
 
 #apn{
