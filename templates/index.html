@@ -82,11 +82,15 @@
             }
             // Mostrar el número total de UEs
             document.getElementById('num').innerHTML = data.num_ues;
+            if(data.num_ues == null){
+                document.getElementById('num').innerHTML = "0";
+            }
+            
             
             if(data.apn == "1"){
                 document.getElementById('apn_activo').innerHTML = "Activo";
                 document.getElementById('apn_estado').src="/static/images/puntoverde.png";
-            }else if(data.apn == "0"){
+            }else if(data.apn == "0" || data.apn == null){
                 document.getElementById('apn_activo').innerHTML = "Inactivo";
                 document.getElementById('apn_estado').src="/static/images/puntorojo.png";
             }

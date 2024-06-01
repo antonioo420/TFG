@@ -12,7 +12,7 @@
         {% endfor %}
     </select>
 
-    <button id="continueTcpdump" class="btn btn-primary active" aria-pressed="true">Iniciar captura</button>
+    <button id="startTcpdump" class="btn btn-primary active" aria-pressed="true">Iniciar captura</button>
 
     <button id="stopTcpdump" class="btn btn-danger active" aria-pressed="true">Detener captura</button>
  
@@ -83,9 +83,9 @@
             alert(message);
         });
 
-        document.getElementById('continueTcpdump').addEventListener('click', function() {
+        document.getElementById('startTcpdump').addEventListener('click', function() {
             var selectedIp = document.getElementById('select-ip').value;
-            socket.emit('continue_tcpdump', { selectedIp: selectedIp });
+            socket.emit('start_tcpdump', { selectedIp: selectedIp });
         });
 
     </script>
