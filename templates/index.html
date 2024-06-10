@@ -4,8 +4,8 @@
 
     <div id="apn">
         <img src="/static/images/gnb.png" alt="Icono gnb" height="60" width="40">
-        APN <span id="apn_activo"> </span>
-        <img src="" id="apn_estado" height="15" width="15">
+        gNB <span id="gnb_activo"> </span>
+        <img src="" id="gnb_estado" height="15" width="15">
     </div>
 
     <div id="ues_block">
@@ -86,13 +86,13 @@
                 document.getElementById('num').innerHTML = "0";
             }
             
-            
-            if(data.apn == "1"){
-                document.getElementById('apn_activo').innerHTML = "Activo";
-                document.getElementById('apn_estado').src="/static/images/puntoverde.png";
-            }else if(data.apn == "0" || data.apn == null){
-                document.getElementById('apn_activo').innerHTML = "Inactivo";
-                document.getElementById('apn_estado').src="/static/images/puntorojo.png";
+            // Mostrar actividad del gNB
+            if(data.gnb == "1"){
+                document.getElementById('gnb_activo').innerHTML = "Activo";
+                document.getElementById('gnb_estado').src="/static/images/puntoverde.png";
+            }else if(data.gnb == "0" || data.apn == null){
+                document.getElementById('gnb_activo').innerHTML = "Inactivo";
+                document.getElementById('gnb_estado').src="/static/images/puntorojo.png";
             }
         });        
 
@@ -123,7 +123,7 @@
         });
 
         function navigateToTrafico(ip) {            
-            // Navegar a la nueva página con el parámetro en la URL
+            // Navegar a trafico con el parámetro en la URL
             window.location.href = `/trafico?select_value=${ip}`;
         }
     </script>

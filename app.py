@@ -7,7 +7,6 @@ import subprocess as sub
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from dummy import addDummy
-from parser_tcpdump import parse_packet
 from utils import *
 
 app = Flask(__name__)
@@ -21,18 +20,6 @@ tcpdump_process = None
 stop_log=False
 #ues = defaultdict(dict)
 
-def actualizar_informacion():
-    ues = defaultdict(dict)
-    while True:
-        time.sleep(1)        
-        ues = obtener_informacion(SMF,ues)  
-        num_ues = obtener_num_ues(AMF)
-        apn = comprobar_apn(AMF)
-        print('Emitiendo:', {'ues':ues, 'num_ues':num_ues, 'apn':apn})
-        #addDummy(ues)
-        socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues, 'apn': apn})
-        time.sleep(5)   
-
 @app.route('/')
 def mostrar_informacion():    
     stop_tcpdump()
@@ -41,47 +28,18 @@ def mostrar_informacion():
     t2.start()  
     current_path = request.path
     return render_template('index.html', current_path = current_path)
-        
-@app.route('/trafico')
-def mostrar_trafico():   
-    ues = defaultdict(dict) 
-    ues = obtener_informacion(SMF, ues)
-    ips = obtener_ips(ues)
-    #print(ips)
-    current_path = request.path
-    select_value = request.args.get('select_value', 'opcion1')
-    return render_template('trafico.html', ips=ips, current_path = current_path, select_value=select_value)
 
-def obtener_trafico(ip):    
-    global tcpdump_process    
-    tcpdump_process = sub.Popen(['sudo', 'tcpdump', '-n', '-i', 'ogstun', '-l', 'host', ip], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
-    
-    for row in iter(tcpdump_process.stdout.readline, ''):
-        if tcpdump_process:
-            #print(row)
-            yield parse_packet(row)
-        else:
-            break
-
-@socketio.on('start_tcpdump')
-def actualizar_trafico(data):
-    for row in obtener_trafico(data['selectedIp']):            
-        socketio.emit('trafico_update', row)
-        #print(json.dumps(row, indent=4))
-
-@socketio.on('stop_tcpdump')
-def stop_tcpdump():
-    global tcpdump_process
-    if tcpdump_process:
-        tcpdump_process.terminate()
-        tcpdump_process = None
-        print("Tcpdump detenido")
-        socketio.emit('tcpdump_stopped', "Tcpdump detenido")
-
-
-@socketio.on('connect')
-def handle_connect():
-    print('Cliente conectado')
+def actualizar_informacion():
+    ues = defaultdict(dict)
+    time.sleep(1)  
+    while True:              
+        ues = obtener_informacion(SMF,ues)  
+        num_ues = obtener_num_ues(AMF)
+        gnb = comprobar_gnb(AMF)
+        #print('Emitiendo:', {'ues':ues, 'num_ues':num_ues, 'gnb':gnb})
+        #addDummy(ues)
+        socketio.emit('info_update', {'ues':ues, 'num_ues':num_ues, 'gnb': gnb})
+        time.sleep(5)   
 
 @socketio.on('start_log')
 def show_log():    
@@ -119,11 +77,51 @@ def stop_log():
     global stop_log 
     stop_log = True
     socketio.emit('log_stopped', "Captura de log detenida")
+        
+@app.route('/trafico')
+def mostrar_trafico():   
+    ues = defaultdict(dict) 
+    ues = obtener_informacion(SMF, ues)
+    ips = obtener_ips(ues)
+    #print(ips)
+    current_path = request.path
+    select_value = request.args.get('select_value', 'opcion1')
+    return render_template('trafico.html', ips=ips, current_path = current_path, select_value=select_value)
 
-@app.route('/analisis')
+def obtener_trafico(ip):    
+    global tcpdump_process    
+    tcpdump_process = sub.Popen(['sudo', 'tcpdump', '-n', '-i', 'ogstun', '-l', 'host', ip], stdout=sub.PIPE, bufsize=1, universal_newlines=True)
+    
+    for row in iter(tcpdump_process.stdout.readline, ''):
+        if tcpdump_process:
+            #print(row)
+            yield parse_packet(row)
+        else:
+            break
+
+@socketio.on('start_tcpdump')
+def actualizar_trafico(data):
+    for row in obtener_trafico(data['selectedIp']):            
+        socketio.emit('trafico_update', row)
+        #print(json.dumps(row, indent=4))
+
+@socketio.on('stop_tcpdump')
+def stop_tcpdump():
+    global tcpdump_process
+    if tcpdump_process:
+        tcpdump_process.terminate()
+        tcpdump_process = None
+        print("Tcpdump detenido")
+        socketio.emit('tcpdump_stopped', "Tcpdump detenido")
+
+@app.route('/estadisticas')
 def pruebas():
     current_path = request.path
-    return render_template('analisis.html', current_path=current_path)
+    return render_template('estadisticas.html', current_path=current_path)
+
+@socketio.on('connect')
+def handle_connect():
+    print('Cliente conectado')
 
 if __name__ == '__main__':    
     socketio.run(app, debug=True)
